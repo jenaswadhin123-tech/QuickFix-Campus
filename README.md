@@ -1,8 +1,8 @@
-# VOXGUARD CAMPUS
+# QuickFix-Campus
 
-**Smart Campus QuickFix · Report. Track. Resolve.**
+**Smart campus issue response · Report. Track. Resolve.**
 
-The primary hostable app is a Streamlit browser application. It ships with session-local demo data so a competition walkthrough works without Firebase credentials or a campus network. The earlier Flutter prototype remains under `lib/` but is not used by the Streamlit entry point.
+The primary hostable app is QuickFix-Campus, a Streamlit browser application. It ships with demo issues and judge accounts so a competition walkthrough works without Firebase credentials or a campus network. The earlier Flutter prototype remains under `lib/` but is not used by the Streamlit entry point.
 
 ## Run Locally
 
@@ -17,10 +17,10 @@ python -m streamlit run streamlit_app.py
 
 Open the local URL printed by Streamlit, usually `http://localhost:8501`.
 
-Run the domain tests with:
+Run the tests with:
 
 ```powershell
-python -m unittest -v test_streamlit_core
+python -m unittest discover -v
 ```
 
 ## Deploy to Streamlit Community Cloud
@@ -32,15 +32,19 @@ python -m unittest -v test_streamlit_core
 
 No secrets are needed for the demo. Keep any future Firebase credentials in Streamlit secrets, never in source control.
 
-## Demo Roles
+## Login and Demo Accounts
 
-Choose a role in the sidebar; no login is required:
+Register a Student or Maintenance account from the starting screen. Registration signs the new account in immediately. Accounts are stored in the local `.quickfix-users.sqlite3` database; passwords are salted and hashed with PBKDF2-HMAC-SHA256 and are never stored in plaintext. Admin registration is disabled.
 
-- **Student:** Maya Patel
-- **Maintenance:** Arun Das, Facilities Team B, or Electrical Team
-- **Admin:** Campus Admin
+Preseeded judge accounts:
 
-All roles in a browser session share the same in-memory demo issues, so the lifecycle can be shown by switching roles. “Reset demo data” restores the seeded state.
+- **Student:** `maya@campus.edu` / `quickfix123`
+- **Maintenance:** `arun@campus.edu` / `quickfix123`
+- **Admin:** `admin@campus.edu` / `quickfix123`
+
+Sign out and log in as another role to demonstrate the shared issue lifecycle. The accounts database is local to the host and ignored by Git. Streamlit Community Cloud's local filesystem is not durable across app rebuilds; use a managed persistent database and a production identity provider for real deployments.
+
+Issue demo data remains session-local. Admin can restore the seeded issue list with **Reset issue demo data**.
 
 ## Competition Walkthrough
 
@@ -58,7 +62,9 @@ The app includes 18 sample reports across eight campus zones, category/severity 
 ```text
 streamlit_app.py          Streamlit UI, browser interactions, and role workspaces
 voxguard.py               Typed demo issue model, seed data, AI fallback, priority, transitions
+auth_store.py             SQLite accounts, PBKDF2 password hashes, demo users
 test_streamlit_core.py    Unit tests for issue lifecycle and duplicate behavior
+test_auth_store.py        Registration, login, and account-store tests
 requirements.txt          Streamlit and chart/QR dependencies
 .streamlit/config.toml    Hosted app theme and headless server setting
 lib/                      Earlier Flutter prototype; not required to run Streamlit

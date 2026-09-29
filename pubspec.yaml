@@ -1,5 +1,5 @@
-name: voxguard_campus
-description: Smart campus issue reporting and resolution.
+name: quickfix_campus
+description: QuickFix-Campus smart campus issue reporting and resolution.
 publish_to: none
 version: 1.0.0+1
 

@@ -12,6 +12,15 @@ import qrcode
 import streamlit as st
 from streamlit_folium import st_folium
 from streamlit_geolocation import streamlit_geolocation
+from auth_store import (
+    DEMO_ACCOUNTS,
+    DEMO_PASSWORD,
+    UserAccount,
+    authenticate_user,
+    ensure_demo_accounts,
+    list_accounts,
+    register_account,
+)
 
 from voxguard import (
     CATEGORIES,
@@ -30,8 +39,8 @@ from voxguard import (
 
 
 st.set_page_config(
-    page_title="VOXGUARD CAMPUS · QuickFix",
-    page_icon="V",
+    page_title="QuickFix-Campus",
+    page_icon="QF",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -84,7 +93,7 @@ def inject_theme() -> None:
         div.stButton > button[kind="primary"], div.stFormSubmitButton > button[kind="primary"] { background: #62D6E5; border-color: #62D6E5; color: #0B1017; font-weight: 700; }
         [data-testid="stProgressBar"] > div > div { background-color: #62D6E5; }
         .vg-brand { display:flex; align-items:center; gap:11px; margin: 3px 0 8px; }
-        .vg-mark { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:#193139; color:#62D6E5; font-family:Manrope,sans-serif; font-weight:800; font-size:19px; border:1px solid #31545B; }
+        .vg-mark { width:40px; height:42px; display:flex; align-items:center; justify-content:center; background:#193139; color:#62D6E5; font-family:Manrope,sans-serif; font-weight:800; font-size:13px; border:1px solid #31545B; clip-path:polygon(50% 0, 94% 17%, 87% 68%, 50% 100%, 13% 68%, 6% 17%); flex:none; }
         .vg-word { color:#F5F8FA; font-family:Manrope,sans-serif; font-size:15px; font-weight:800; letter-spacing:0; line-height:1.1; overflow-wrap:anywhere; }
         .vg-product { color:#62D6E5; font-size:9px; font-weight:700; letter-spacing:0; margin-top:4px; overflow-wrap:anywhere; }
         .vg-eyebrow { color:#62D6E5; font-size:10px; font-weight:700; letter-spacing:0; margin-bottom:6px; overflow-wrap:anywhere; }
@@ -104,12 +113,19 @@ def inject_theme() -> None:
 def initialize_state() -> None:
     if "issues" not in st.session_state:
         st.session_state.issues = seed_issues()
+    if "accounts_initialized" not in st.session_state:
+        ensure_demo_accounts()
+        st.session_state.accounts_initialized = True
     if "role" not in st.session_state:
         st.session_state.role = "Student"
+    if "is_authenticated" not in st.session_state:
+        st.session_state.is_authenticated = False
     if "report_step" not in st.session_state:
         st.session_state.report_step = 0
     if "current_user" not in st.session_state:
-        st.session_state.current_user = "Maya Patel"
+        st.session_state.current_user = None
+    if "current_account" not in st.session_state:
+        st.session_state.current_account = None
     if "nav" not in st.session_state:
         st.session_state.nav = ROLE_PAGES[st.session_state.role][0]
     if "pending_report" not in st.session_state:
@@ -146,10 +162,81 @@ def clear_report() -> None:
 
 def brand(compact: bool = False) -> None:
     st.markdown(
-        f"""<div class="vg-brand"><div class="vg-mark">V</div><div>
-        <div class="vg-word">VOXGUARD</div><div class="vg-product">CAMPUS · QUICKFIX</div></div></div>""",
+        f"""<div class="vg-brand"><div class="vg-mark">QF</div><div>
+        <div class="vg-word">QuickFix-Campus</div><div class="vg-product">REPORT · TRACK · RESOLVE</div></div></div>""",
         unsafe_allow_html=True,
     )
+
+
+def start_user_session(account: UserAccount) -> None:
+    st.session_state.is_authenticated = True
+    st.session_state.current_user = account.name
+    st.session_state.current_account = account
+    st.session_state.role = account.role
+    st.session_state.nav = ROLE_PAGES[account.role][0]
+
+
+def render_auth_page() -> None:
+    left, right = st.columns([1.05, 1], gap="large")
+    with left:
+        brand()
+        st.markdown("<div style='height:2rem'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="vg-eyebrow">SMART CAMPUS · QUICKFIX</div>', unsafe_allow_html=True)
+        st.title("Welcome to QuickFix-Campus")
+        st.caption("Sign in to report campus issues, coordinate repairs, and follow each resolution.")
+        st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("Demo access")
+            st.caption(f"Use a demo account · password: `{DEMO_PASSWORD}`")
+            for name, email, role, _, _, _ in DEMO_ACCOUNTS:
+                account_column, action_column = st.columns([1.3, 1])
+                with account_column:
+                    st.markdown(f"**{role}** · {name}")
+                with action_column:
+                    if st.button(f"Use {role}", key=f"demo-login-{role}", use_container_width=True):
+                        st.session_state.auth_email = email
+                        st.session_state.auth_password = DEMO_PASSWORD
+
+    with right:
+        mode = st.radio("Account", ["Log in", "Register"], horizontal=True, label_visibility="collapsed", key="auth_mode")
+        if mode == "Log in":
+            with st.form("login-form"):
+                email = st.text_input("Email", placeholder="you@campus.edu", autocomplete="email", key="auth_email")
+                password = st.text_input("Password", type="password", autocomplete="current-password", key="auth_password")
+                submitted = st.form_submit_button("LOG IN", type="primary", use_container_width=True)
+            if submitted:
+                account = authenticate_user(email, password)
+                if account is None:
+                    st.error("Email or password is incorrect.")
+                else:
+                    start_user_session(account)
+                    st.rerun()
+        else:
+            role = st.selectbox("Register as", ["Student", "Maintenance"], key="register_role")
+            with st.form("register-form"):
+                name = st.text_input("Full name", autocomplete="name")
+                email = st.text_input("Email", placeholder="you@campus.edu", autocomplete="email")
+                password = st.text_input("Password", type="password", help="Use at least 8 characters.", autocomplete="new-password")
+                institution = st.text_input("College / institution")
+                student_id = st.text_input("Student ID", disabled=role != "Student")
+                phone = st.text_input("Phone number", autocomplete="tel")
+                submitted = st.form_submit_button("CREATE ACCOUNT", type="primary", use_container_width=True)
+            if submitted:
+                account, error = register_account(
+                    name=name,
+                    email=email,
+                    password=password,
+                    role=role,
+                    institution=institution,
+                    student_id=student_id,
+                    phone=phone,
+                )
+                if error:
+                    st.error(error)
+                elif account is not None:
+                    start_user_session(account)
+                    st.success("Account created. You are now signed in.")
+                    st.rerun()
 
 
 def page_heading(eyebrow: str, title: str, subtitle: str = "") -> None:
@@ -649,7 +736,10 @@ def render_issue_detail(issue: CampusIssue) -> None:
         with st.expander("Admin controls"):
             with st.form(f"admin-controls-{issue.issue_id}"):
                 selected_severity = st.selectbox("Confirmed severity", ["Low", "Medium", "High", "Critical"], index=["Low", "Medium", "High", "Critical"].index(issue.severity))
-                staff_name = st.selectbox("Assign to", ["Arun Das", "Facilities Team B", "Electrical Team"])
+                registered_staff = [account.name for account in list_accounts("Maintenance")]
+                staff_options = sorted(set(registered_staff + ["Facilities Team B", "Electrical Team"]), key=str.casefold)
+                current_assignee = issue.assigned_staff if issue.assigned_staff in staff_options else staff_options[0]
+                staff_name = st.selectbox("Assign to", staff_options, index=staff_options.index(current_assignee))
                 save_controls = st.form_submit_button("Save issue controls", type="primary")
             if save_controls:
                 issue.severity = selected_severity  # type: ignore[assignment]
@@ -809,12 +899,15 @@ def render_analytics() -> None:
 
 def render_profile() -> None:
     role = st.session_state.role
-    name = {"Student": "Maya Patel", "Maintenance": "Arun Das", "Admin": "Campus Admin"}[role]
+    account: UserAccount = st.session_state.current_account
+    name = account.name
     page_heading("ACCOUNT", "Profile and preferences", "Competition demo access · changes stay in this browser session.")
     with st.container(border=True):
         st.subheader(name)
-        st.caption(f"{role.upper()} · {name.lower().replace(' ', '.')}@campus.edu")
-        st.caption("Voxguard Campus · Academic campus demo")
+        st.caption(f"{role.upper()} · {account.email}")
+        st.caption(f"{account.institution} · {account.student_id or 'Campus user'}")
+        st.caption(f"Phone · {account.phone}")
+        st.caption("QuickFix-Campus · Academic campus demo")
     st.toggle("Issue updates", value=True, key="notifications-enabled")
     st.selectbox("Language catalog", ["English", "Hindi", "Odia"], help="ARB catalogs are included; UI translation is not fully wired yet.")
     st.info("Switch roles from the sidebar. Each demo role shares this browser session's issue state.")
@@ -834,34 +927,32 @@ def main() -> None:
     initialize_state()
     inject_theme()
 
+    if not st.session_state.is_authenticated:
+        render_auth_page()
+        return
+
+    role: Role = st.session_state.role
+
     with st.sidebar:
         brand()
-        st.caption("SMART CAMPUS QUICKFIX")
+        st.caption(f"{st.session_state.current_user} · {role}")
         st.markdown("---")
-        role = st.selectbox("DEMO ROLE", ["Student", "Maintenance", "Admin"], key="role")
-        if st.session_state.get("_role_seen") != role:
-            st.session_state._role_seen = role
-            st.session_state.nav = ROLE_PAGES[role][0]
-            st.session_state.current_user = {"Student": "Maya Patel", "Maintenance": "Arun Das", "Admin": "Campus Admin"}[role]
-        if role == "Maintenance":
-            st.session_state.current_user = st.selectbox(
-                "STAFF ACCOUNT",
-                ["Arun Das", "Facilities Team B", "Electrical Team"],
-                key="staff_identity",
-            )
         requested_page = st.session_state.pop("_next_nav", None)
         if requested_page in ROLE_PAGES[role]:
             st.session_state.nav = requested_page
         st.radio("WORKSPACE", ROLE_PAGES[role], key="nav", label_visibility="visible")
         st.markdown("---")
-        st.markdown(f"<span style='color:{MINT};font-size:11px'>●  DEMO DATA · SESSION ONLY</span>", unsafe_allow_html=True)
-        st.caption("No sign-in or campus connection required.")
-        if st.button("Reset demo data", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
+        st.markdown(f"<span style='color:{MINT};font-size:11px'>●  QUICKFIX-CAMPUS</span>", unsafe_allow_html=True)
+        if role == "Admin" and st.button("Reset issue demo data", use_container_width=True):
+            st.session_state.issues = seed_issues()
+            st.session_state._next_nav = ROLE_PAGES[role][0]
+            st.rerun()
+        if st.button("Log out", use_container_width=True):
+            st.session_state.is_authenticated = False
+            st.session_state.current_user = None
+            st.session_state.current_account = None
             st.rerun()
 
-    role = st.session_state.role
     page = st.session_state.nav
     if role == "Student":
         if page == "Home":

@@ -1,4 +1,4 @@
-"""Demo-domain logic for the VOXGUARD CAMPUS Streamlit application."""
+"""Demo-domain logic for the QuickFix-Campus Streamlit application."""
 
 from __future__ import annotations
 

@@ -22,5 +22,5 @@ Future<void> main() async {
   }
   final controller = AppController(repository: repository, aiService: DemoAIService());
   await controller.initialize();
-  runApp(VoxguardApp(controller: controller));
+  runApp(QuickFixCampusApp(controller: controller));
 }

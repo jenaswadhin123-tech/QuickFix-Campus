@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:voxguard_campus/app_controller.dart';
-import 'package:voxguard_campus/data/issue_repository.dart';
-import 'package:voxguard_campus/models/issue.dart';
-import 'package:voxguard_campus/services/ai_service.dart';
+import 'package:quickfix_campus/app_controller.dart';
+import 'package:quickfix_campus/data/issue_repository.dart';
+import 'package:quickfix_campus/models/issue.dart';
+import 'package:quickfix_campus/services/ai_service.dart';
 
 void main() {
   late AppController controller;

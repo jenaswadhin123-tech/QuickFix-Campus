@@ -11,13 +11,13 @@ import 'app_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'models/issue.dart';
 
-class VoxguardApp extends StatelessWidget {
-  const VoxguardApp({super.key, required this.controller});
+class QuickFixCampusApp extends StatelessWidget {
+  const QuickFixCampusApp({super.key, required this.controller});
   final AppController controller;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'VOXGUARD CAMPUS',
+        title: 'QuickFix-Campus',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: AnimatedBuilder(
@@ -509,7 +509,7 @@ class CampusPage extends StatelessWidget {
       const Positioned(right: 32, top: 51, child: MapPin(label: 'BLOCK B', color: Color(0xFFFF6478), count: '7')),
       const Positioned(left: 94, bottom: 33, child: MapPin(label: 'LIBRARY', color: AppTheme.cyan, count: '3')),
       const Positioned(right: 25, bottom: 28, child: MapPin(label: 'CANTEEN', color: AppTheme.mint, count: '2')),
-      const Positioned(left: 18, bottom: 12, child: Text('VOXGUARD CAMPUS · ISSUE DENSITY', style: TextStyle(fontSize: 9, color: AppTheme.muted, letterSpacing: 1))),
+      const Positioned(left: 18, bottom: 12, child: Text('QUICKFIX-CAMPUS · ISSUE DENSITY', style: TextStyle(fontSize: 9, color: AppTheme.muted, letterSpacing: 0))),
     ])),
     if (controller.role == UserRole.admin) ...[
       const SizedBox(height: 14),
@@ -598,7 +598,7 @@ class ProfilePage extends StatelessWidget {
     final name = role == UserRole.student ? 'Maya Patel' : role == UserRole.staff ? 'Arun Das' : 'Campus Admin';
     return PageScroll(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Eyebrow('ACCOUNT'), const SizedBox(height: 6), const Text('Your profile', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700)), const SizedBox(height: 22),
-      Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: AppTheme.panel, borderRadius: BorderRadius.circular(16)), child: Column(children: [const CircleAvatar(radius: 32, backgroundColor: AppTheme.panelRaised, child: Icon(Icons.person_rounded, color: AppTheme.cyan, size: 30)), const SizedBox(height: 12), Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)), Text('${role.name.toUpperCase()} · Voxguard Campus', style: const TextStyle(color: AppTheme.muted, fontSize: 12)), const SizedBox(height: 14), const Text('maya.patel@campus.edu', style: TextStyle(color: AppTheme.muted))])),
+      Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: AppTheme.panel, borderRadius: BorderRadius.circular(16)), child: Column(children: [const CircleAvatar(radius: 32, backgroundColor: AppTheme.panelRaised, child: Icon(Icons.person_rounded, color: AppTheme.cyan, size: 30)), const SizedBox(height: 12), Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)), Text('${role.name.toUpperCase()} · QuickFix-Campus', style: const TextStyle(color: AppTheme.muted, fontSize: 12)), const SizedBox(height: 14), const Text('maya.patel@campus.edu', style: TextStyle(color: AppTheme.muted))])),
       const SizedBox(height: 20),
       const Eyebrow('PREFERENCES'),
       const ListTile(leading: Icon(Icons.notifications_none_rounded, color: AppTheme.cyan), title: Text('Notifications'), trailing: Icon(Icons.toggle_on_rounded, color: AppTheme.mint, size: 34)),
@@ -680,8 +680,8 @@ class BrandMark extends StatelessWidget {
   final bool compact;
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-    Container(width: compact ? 35 : 45, height: compact ? 35 : 45, decoration: BoxDecoration(color: AppTheme.cyan.withValues(alpha: .12), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.graphic_eq_rounded, color: AppTheme.cyan, size: compact ? 22 : 28)),
-    const SizedBox(width: 10), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('VOXGUARD', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1)), Text(compact ? 'CAMPUS · QUICKFIX' : 'CAMPUS', style: TextStyle(fontSize: compact ? 9 : 11, color: AppTheme.cyan, letterSpacing: 2, fontWeight: FontWeight.w600))]),
+      Container(width: compact ? 35 : 45, height: compact ? 35 : 45, decoration: BoxDecoration(color: AppTheme.cyan.withValues(alpha: .12), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.shield_rounded, color: AppTheme.cyan, size: compact ? 22 : 28)),
+    const SizedBox(width: 10), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('QuickFix-Campus', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 0)), Text(compact ? 'REPORT · TRACK · RESOLVE' : 'SMART CAMPUS', style: TextStyle(fontSize: compact ? 9 : 11, color: AppTheme.cyan, letterSpacing: 0, fontWeight: FontWeight.w600))]),
   ]);
 }
 

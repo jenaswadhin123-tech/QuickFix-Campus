@@ -70,6 +70,9 @@ class VoxguardCoreTests(unittest.TestCase):
 
     def test_admin_dashboard_shows_new_low_priority_reports(self) -> None:
         app = AppTest.from_file("streamlit_app.py").run(timeout=20)
+        next(item for item in app.text_input if item.label == "Email").set_value("admin@campus.edu").run(timeout=20)
+        next(item for item in app.text_input if item.label == "Password").set_value("quickfix123").run(timeout=20)
+        next(button for button in app.button if button.label == "LOG IN").click().run(timeout=20)
         issue = create_issue(
             description="Fresh low priority report",
             category="Other",
@@ -80,10 +83,10 @@ class VoxguardCoreTests(unittest.TestCase):
             reported_by="Maya Patel",
         )
         app.session_state["issues"].insert(0, issue)
-
-        next(item for item in app.selectbox if item.label == "DEMO ROLE").set_value("Admin").run(timeout=20)
+        app.run(timeout=20)
 
         self.assertFalse(app.exception)
+        self.assertEqual(app.session_state["role"], "Admin")
         self.assertTrue(any(issue.title in item.value for item in app.markdown))
 
     def test_new_report_has_submission_and_ai_timeline(self) -> None:
