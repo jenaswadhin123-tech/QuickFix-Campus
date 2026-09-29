@@ -1,0 +1,13 @@
+{
+  "@@locale": "hi",
+  "appName": "वॉक्सगार्ड कैंपस",
+  "tagline": "रिपोर्ट करें। ट्रैक करें। समाधान पाएं।",
+  "reportIssue": "समस्या रिपोर्ट करें",
+  "myIssues": "मेरी समस्याएं",
+  "campusHealth": "कैंपस स्वास्थ्य",
+  "submitIssue": "समस्या भेजें",
+  "scanLocation": "स्थान QR स्कैन करें",
+  "useCurrentLocation": "वर्तमान स्थान उपयोग करें",
+  "inProgress": "कार्य प्रगति पर",
+  "resolved": "समाधान किया गया"
+}

@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "appName": "VOXGUARD CAMPUS",
+  "tagline": "Report. Track. Resolve.",
+  "reportIssue": "Report an issue",
+  "myIssues": "My issues",
+  "campusHealth": "Campus health",
+  "submitIssue": "Submit issue",
+  "scanLocation": "Scan location QR",
+  "useCurrentLocation": "Use current location",
+  "inProgress": "In progress",
+  "resolved": "Resolved"
+}
